@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 function BookSearch() {
   const [searchInput, setSearchInput] = useState('');
@@ -11,8 +11,7 @@ function BookSearch() {
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch books based on query and page
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     if (!query) return;
     setLoading(true);
     setError('');
@@ -28,9 +27,8 @@ function BookSearch() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, page]);
 
-  // Fetch suggestions based on input
   const fetchSuggestions = async (input) => {
     if (!input.trim()) {
       setSuggestions([]);
@@ -50,7 +48,6 @@ function BookSearch() {
     }
   };
 
-  // Debounce input changes for suggestions
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetchSuggestions(searchInput);
@@ -58,12 +55,10 @@ function BookSearch() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
-  // Fetch books when query or page changes
   useEffect(() => {
     fetchBooks();
-  }, [query, page]);
+  }, [fetchBooks]);
 
-  // Handle clicking suggestion
   const handleSuggestionClick = (title) => {
     setQuery(title);
     setSearchInput(title);
@@ -71,11 +66,9 @@ function BookSearch() {
     setSuggestions([]);
   };
 
-  // Highlight the matched part of the suggestion
   const highlightText = (text, query) => {
     if (!query) return text;
-
-    const parts = text.split(new RegExp(`(${query})`, 'gi')); // Split by query and highlight
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
     return parts.map((part, index) =>
       part.toLowerCase() === query.toLowerCase() ? (
         <span key={index} style={{ fontWeight: 'bold', color: '#007bff' }}>
@@ -111,8 +104,9 @@ function BookSearch() {
               top: '100%',
               left: 0,
               width: '100%',
-              background: 'white',
-              border: '1px solid #cce0ff',
+              background: '#2e2e2e',
+              color: 'white',
+              border: '1px solid #444',
               borderTop: 'none',
               borderRadius: '0 0 8px 8px',
               maxHeight: '200px',
@@ -130,10 +124,12 @@ function BookSearch() {
                 style={{
                   padding: '0.7rem',
                   cursor: 'pointer',
-                  borderBottom: '1px solid #f0f0f0',
-                  backgroundColor: '#fdfdfd',
+                  borderBottom: '1px solid #555',
+                  backgroundColor: '#2e2e2e',
                   transition: 'background-color 0.2s',
                 }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#3a3a3a')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2e2e2e')}
               >
                 {highlightText(sug.title, searchInput)}
               </li>
@@ -184,3 +180,5 @@ function BookSearch() {
 }
 
 export default BookSearch;
+
+
